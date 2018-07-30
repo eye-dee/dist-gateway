@@ -1,0 +1,3 @@
+[submodule "dist-proto"]
+	path = dist-proto
+	url = https://github.com/sausageRoll/dist-proto.git
