@@ -38,7 +38,9 @@ task copyDockerfile(type: Copy) {
     into buildDir
 }
 
+
 import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+import org.apache.tools.ant.taskdefs.condition.Os
 
 task buildDocker(type: DockerBuildImage, dependsOn: build) {
     inputDir = buildDir
@@ -50,11 +52,18 @@ buildDocker.dependsOn(copyDockerfile, build)
 ext {
     nettyVersion = '5.0.0.Alpha2'
     protobufVersion = '3.6.1'
+    protocPath = ''
+}
+
+if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+    protocPath = 'C:\\Program Files\\protoc-3.5.1\\bin\\protoc.exe'
+} else {
+    protocPath = '/usr/local/bin/protoc'
 }
 
 protobuf {
     protoc {
-        path = 'C:\\Program Files\\protoc-3.5.1\\bin\\protoc.exe'
+        path = "$protocPath"
     }
     generatedFilesBaseDir = "$projectDir/src"
 }
