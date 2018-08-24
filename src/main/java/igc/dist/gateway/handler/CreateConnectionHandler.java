@@ -1,11 +1,15 @@
 package igc.dist.gateway.handler;
 
+import igc.dist.gateway.handler.DatabaseRegistrationHandler.DatabaseEntity;
 import igc.dist.gateway.service.DatabaseChooser;
 import igc.dist.proto.Connection.ChooseDatabase;
 import igc.dist.proto.Connection.CreateConnectionRequest;
 import igc.dist.proto.Connection.CreateConnectionResponse;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelId;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +18,7 @@ import org.springframework.stereotype.Service;
 public class CreateConnectionHandler implements
     ReplyingHandler<CreateConnectionRequest, CreateConnectionResponse> {
 
+  public static final Map<ChannelId, DatabaseEntity> USER_SESSION = new ConcurrentHashMap<>();
   private final DatabaseChooser databaseChooser;
 
   @Override
@@ -27,9 +32,12 @@ public class CreateConnectionHandler implements
             .setToken(token)
             .build());
 
+    USER_SESSION.putIfAbsent(ctx.channel().id(), entry.getValue());
+
     return CreateConnectionResponse.newBuilder()
         .setToken(token)
         .setHost(entry.getValue().getHost())
+        .setPort(entry.getValue().getPort())
         .build();
   }
 
