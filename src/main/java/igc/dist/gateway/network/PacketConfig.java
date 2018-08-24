@@ -8,6 +8,7 @@ import igc.dist.proto.Connection.CreateConnection;
 import igc.dist.proto.Connection.CreateConnectionRequest;
 import igc.dist.proto.Connection.CreateConnectionResponse;
 import igc.dist.proto.Connection.MessageAccepted;
+import igc.dist.proto.Query.InternalQueryRequest;
 import igc.dist.proto.Query.QueryRequest;
 import igc.dist.proto.Query.QueryResponse;
 import igc.dist.proto.Register.RegistrationRequest;
@@ -33,6 +34,7 @@ public class PacketConfig {
 
     messages.put(1005, QueryRequest.getDefaultInstance());
     messages.put(1006, QueryResponse.getDefaultInstance());
+    messages.put(1009, InternalQueryRequest.getDefaultInstance());
 
     messages.put(1007, RegistrationRequest.getDefaultInstance());
     messages.put(1008, RegistrationResponse.getDefaultInstance());

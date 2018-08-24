@@ -26,7 +26,7 @@ public class CreateConnectionHandler implements
       ChannelHandlerContext ctx) {
     var entry = databaseChooser.chooseDatabase(DatabaseRegistrationHandler.CONNECTED_DATABASES);
 
-    final String token = UUID.randomUUID().toString();
+    final String token = ctx.channel().id().asLongText();
     entry.getValue().getContext()
         .writeAndFlush(ChooseDatabase.newBuilder()
             .setToken(token)
