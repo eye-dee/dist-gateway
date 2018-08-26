@@ -14,11 +14,7 @@ public class UserQueryRequestHandler implements PacketHandler<QueryRequest> {
 
   @Override
   public void handle(QueryRequest request, ChannelHandlerContext ctx) {
-    log.info("request received {}", request);
     USER_SESSION.computeIfPresent(ctx.channel().id(), (id, db) -> {
-      log.info("request {}", request);
-      log.info("token for database = {}", id.asLongText());
-      log.info("context = {}", db.getContext());
       db.getContext().writeAndFlush(InternalQueryRequest.newBuilder()
           .setQuery(request.getQuery())
           .setQueryType(request.getQueryType())
