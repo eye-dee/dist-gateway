@@ -1,0 +1,94 @@
+buildscript {
+    ext {
+        springBootVersion = '2.0.4.RELEASE'
+    }
+    repositories {
+        jcenter()
+        maven { url 'https://plugins.gradle.org/m2/' }
+        maven { url "https://repo.spring.io/snapshot" }
+        maven { url "https://repo.spring.io/milestone" }
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.6'
+        classpath 'com.bmuschko:gradle-docker-plugin:3.5.0'
+    }
+}
+
+apply plugin: 'com.bmuschko.docker-remote-api'
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'com.google.protobuf'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+
+
+group 'igc'
+version '1.0-SNAPSHOT'
+
+repositories {
+    jcenter()
+    mavenCentral()
+}
+
+task copyDockerfile(type: Copy) {
+    from 'docker/Dockerfile', 'docker/entrypoint.sh'
+    into buildDir
+}
+
+
+import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+import org.apache.tools.ant.taskdefs.condition.Os
+
+task buildDocker(type: DockerBuildImage, dependsOn: build) {
+    inputDir = buildDir
+    tag = 'igc/gateway:latest'
+}
+
+buildDocker.dependsOn(copyDockerfile, build)
+
+ext {
+    nettyVersion = '5.0.0.Alpha2'
+    protobufVersion = '3.6.1'
+    protocPath = ''
+}
+
+if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+    protocPath = 'C:\\Program Files\\protoc-3.5.1\\bin\\protoc.exe'
+} else {
+    protocPath = '/usr/local/bin/protoc'
+}
+
+protobuf {
+    protoc {
+        path = "$protocPath"
+    }
+    generatedFilesBaseDir = "$projectDir/src"
+}
+
+dependencies {
+    compile("org.springframework.boot:spring-boot-starter-web")
+    testCompile 'org.springframework.boot:spring-boot-starter-test'
+    compile 'org.projectlombok:lombok'
+
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+
+    implementation "io.netty:netty-all:${nettyVersion}"
+    implementation "com.google.protobuf:protobuf-java:${protobufVersion}"
+
+    compile 'com.google.guava:guava:18.0'
+
+    compile group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.0'
+    compile group: 'com.sun.xml.bind', name: 'jaxb-core', version: '2.3.0.1'
+    compile group: 'com.sun.xml.bind', name: 'jaxb-impl', version: '2.3.0.1'
+}
+
+sourceSets {
+    main {
+        proto {
+            srcDir 'dist-proto/src/proto'
+        }
+    }
+}
